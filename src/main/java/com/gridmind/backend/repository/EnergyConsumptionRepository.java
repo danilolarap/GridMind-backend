@@ -1,0 +1,39 @@
+package com.gridmind.backend.repository;
+
+import com.gridmind.backend.model.EnergyConsumption;
+import com.gridmind.backend.model.Device;
+import com.gridmind.backend.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface EnergyConsumptionRepository extends JpaRepository<EnergyConsumption, Long> {
+
+    void deleteByDevice(Device device);
+
+    Page<EnergyConsumption> findByDevice(Device device, Pageable pageable);
+
+    @Query(value = "SELECT * FROM (SELECT ec.* FROM energy_consumptions ec JOIN devices d ON ec.device_id = d.id WHERE d.user_id = :userId ORDER BY ec.timestamp DESC LIMIT 10000) sub ORDER BY timestamp ASC", nativeQuery = true)
+    List<EnergyConsumption> findHistoryForPrediction(@Param("userId") Long userId);
+
+    @Query(value = "SELECT ec.* FROM energy_consumptions ec WHERE ec.device_id = :deviceId ORDER BY ec.timestamp ASC LIMIT 500", nativeQuery = true)
+    List<EnergyConsumption> findTop500ByDeviceOrderByTimestampAsc(@Param("deviceId") Long deviceId);
+
+    @org.springframework.data.jpa.repository.Query(
+        "SELECT CAST(e.timestamp AS LocalDate) AS date, SUM(e.consumption) AS totalKwh " +
+        "FROM EnergyConsumption e " +
+        "WHERE e.device.user.id = :userId " +
+        "GROUP BY CAST(e.timestamp AS LocalDate) " +
+        "ORDER BY date ASC"
+    )
+    java.util.List<com.gridmind.backend.dto.DailyConsumptionDTO> findDailyConsumptionByUserId(
+        @org.springframework.data.repository.query.Param("userId") Long userId
+    );
+
+    @Query("SELECT SUM(e.consumption) FROM EnergyConsumption e WHERE e.device.user.id = :userId")
+    java.math.BigDecimal sumConsumptionByUserId(@Param("userId") Long userId);
+}

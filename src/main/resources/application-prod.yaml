@@ -1,0 +1,27 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+server:
+  port: ${PORT:8080}
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:}
+ia:
+  service:
+    url: ${IA_SERVICE_URL:https://gridmind-ia-production.up.railway.app/predict}
+app:
+  resend:
+    api-key: ${RESEND_API_KEY:}
+    from-email: "GridMind <soporte@gridmind.lat>"
+  frontend:
+    url: ${FRONTEND_URL:https://gridmind-on.vercel.app}
