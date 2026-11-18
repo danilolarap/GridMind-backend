@@ -24,3 +24,8 @@ Las pruebas usan el perfil test y H2 en memoria: no necesitan PostgreSQL ni clav
 ## Limites actuales
 
 El estado de los reles se mantiene en memoria. Los canales WebSocket son publicos y compartidos; requieren autenticacion y aislamiento por usuario antes de utilizarse con datos privados en produccion.
+
+## Docker (esqueleto completo)
+
+`compose.yaml` levanta frontend, backend, predictor y PostgreSQL con `docker compose up --build`.
+Requisitos, variables e inicialización de la base: ver [DOCKER.md](DOCKER.md).

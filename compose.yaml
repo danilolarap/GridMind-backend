@@ -1,0 +1,73 @@
+# Walking skeleton de GridMind: frontend web, backend, predictor y PostgreSQL.
+# Uso: copia .env.docker.example a .env, completa los valores y ejecuta
+#   docker compose up --build
+# Los repos GridMind-frontend y GridMind-ia deben estar clonados junto a este
+# (o indica su ruta con FRONTEND_PATH e IA_PATH en .env).
+
+name: gridmind
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: gridmind_db
+      POSTGRES_USER: ${POSTGRES_USER:-gridmind}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  ia:
+    build: ${IA_PATH:-../GridMind-ia}
+    environment:
+      PORT: "5000"
+    ports:
+      - "${IA_PORT:-5000}:5000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+      ia:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/gridmind_db
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-gridmind}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env (al menos 32 caracteres)}
+      IA_SERVICE_URL: http://ia:5000/predict
+      FRONTEND_URL: http://localhost:${FRONTEND_PORT:-5173}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      PORT: "8080"
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+
+  frontend:
+    build:
+      context: ${FRONTEND_PATH:-../GridMind-frontend}
+      args:
+        # El navegador del host llama al backend, por eso se usa localhost.
+        VITE_API_URL: http://localhost:${BACKEND_PORT:-8080}
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+
+volumes:
+  db-data:
+  uploads:
