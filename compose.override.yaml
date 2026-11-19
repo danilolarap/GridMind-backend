@@ -1,0 +1,13 @@
+# Origen compartido de frontend/API/WS, validado en el Codespace.
+# Conserva servicios, Dockerfiles, nombre del proyecto y volúmenes de compose.yaml.
+services:
+  backend:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      FRONTEND_URL: ${BROWSER_ORIGIN:-http://localhost:5173}
+  frontend:
+    build:
+      args:
+        VITE_API_URL: ${BROWSER_ORIGIN:-http://localhost:5173}
+    volumes:
+      - ./docker/frontend.conf:/etc/nginx/conf.d/default.conf:ro

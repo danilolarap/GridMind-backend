@@ -71,3 +71,7 @@ Thumbs.db
 .env.production
 
 uploads/
+
+# Generated review snapshots; source changes are reviewed through Git commits.
+/docs/integracion-ia-caida.patch
+/docs/integracion-frontend.patch
