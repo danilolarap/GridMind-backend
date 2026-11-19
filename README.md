@@ -11,7 +11,7 @@ API de gestion de energia con Java 17 o superior, Spring Boot y PostgreSQL.
 
 Swagger: http://localhost:8080/swagger-ui/index.html
 
-`GEMINI_API_KEY` habilita el analisis de facturas y `RESEND_API_KEY` el correo de recuperacion. Sin ellas no se prestan esas funciones. `IA_SERVICE_URL` apunta al microservicio de predicciones, cuyo codigo no se incluye en esta copia. Las carpetas frontend e ia-service estan vacias.
+`GEMINI_API_KEY` habilita el analisis de facturas y `RESEND_API_KEY` el correo de recuperacion. Sin ellas no se prestan esas funciones. `IA_SERVICE_URL` apunta al microservicio de predicciones, mantenido en el repositorio separado `GridMind-ia`.
 
 Para produccion configura `SPRING_PROFILES_ACTIVE=prod`, las tres variables de PostgreSQL, `JWT_SECRET`, `FRONTEND_URL` y las claves de las integraciones utilizadas. El contenedor escucha en `PORT` (8080 por defecto). Conserva `uploads/` en un volumen persistente para no perder las imagenes de facturas.
 
@@ -27,5 +27,6 @@ El estado de los reles se mantiene en memoria. Los canales WebSocket son publico
 
 ## Docker (esqueleto completo)
 
-`compose.yaml` levanta frontend, backend, predictor y PostgreSQL con `docker compose up --build`.
-Requisitos, variables e inicialización de la base: ver [DOCKER.md](DOCKER.md).
+`compose.yaml` y su override levantan frontend, backend, predictor y PostgreSQL con `docker compose up --build`.
+Requisitos, variables, escenario de caida de IA y Codespaces: ver [DOCKER.md](DOCKER.md).
+Los [resultados de validacion](docs/validacion-ia-caida.md) distinguen pruebas realizadas y pendientes.
